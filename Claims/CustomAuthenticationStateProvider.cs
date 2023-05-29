@@ -20,13 +20,13 @@ namespace AuthorizationSample.Claims {
             }
         }
 
-        public override Task<AuthenticationState> GetAuthenticationStateAsync() {
-            var authState = base.GetAuthenticationStateAsync().Result;
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync() {
+            var authState = await base.GetAuthenticationStateAsync();
             var identity = (ClaimsIdentity?) authState.User.Identity;
             if (identity == null) {
-                return Task.FromResult(authState);
+                return authState;
             }
-            if (authState.User.Identity?.Name == "bryanjonker@gmail.com") {
+            if (authState.User.Identity?.Name == "jonker") {
                 identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
             } else {
                 identity.AddClaim(new Claim(ClaimTypes.Role, "Student"));
@@ -34,7 +34,7 @@ namespace AuthorizationSample.Claims {
             identity.AddClaim(new Claim("impersonate", authState.User.Identity?.Name ?? ""));
             var user = new ClaimsPrincipal(identity);
             currentUser = user;
-            return Task.FromResult(new AuthenticationState(user));
+            return new AuthenticationState(user);
         }
 
         public Task<AuthenticationState> Impersonate(string user) {
@@ -49,6 +49,12 @@ namespace AuthorizationSample.Claims {
             identity.AddClaim(new Claim("impersonate", user));
             currentUser = new ClaimsPrincipal(identity);
             return Task.FromResult(new AuthenticationState(CurrentUser));
+        }
+
+        public IdentityUser PullManually() {
+            var identityUser = new IdentityUser("jonker");
+            identityUser.Email = "bryanjonker@gmail.com";
+            return identityUser;
         }
     }
 }
