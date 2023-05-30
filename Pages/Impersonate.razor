@@ -1,12 +1,33 @@
 ﻿@page "/impersonate"
+@attribute [Authorize(Roles = "Admin")]
+@using AuthorizationSample.Claims;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <AuthorizeView>
     <Authorized>
         <p>Hello, @context.User.Identity.Name!</p>
+
+        <p>You are impersonating "@context.User.Claims.SingleOrDefault(c => c.Type == "impersonate")?.Value"</p>
+
+
+        <p><button class="btn btn-primary" @onclick="Change">Change Impersonation</button></p>
+
+        <p><button class="btn btn-primary" @onclick="Remove">Remove Impersonation</button></p>
+
     </Authorized>
     <NotAuthorized>
-        <p>You're not authorized.</p>
+        <p>Only administrators can impersonate students.</p>
     </NotAuthorized>
 </AuthorizeView>
 
+@code {
+    private void Change()
+    {
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).Impersonate("sample");
+    }
+
+    private void Remove()
+    {
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).RemoveImpersonation();
+    }
+}

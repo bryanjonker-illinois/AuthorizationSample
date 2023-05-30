@@ -3,7 +3,6 @@
 #nullable disable
 
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using AuthorizationSample.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -73,10 +72,6 @@ namespace AuthorizationSample.Areas.Identity.Pages.Account {
             returnUrl ??= Url.Content("~/");
 
             // New code
-            var newResult = _customAuthenticationStateProvider.PullManually();
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            await _signInManager.SignInWithClaimsAsync(newResult, true, new List<Claim>());
-            return LocalRedirect(returnUrl);
 
             // End new code
 
