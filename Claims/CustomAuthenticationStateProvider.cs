@@ -50,7 +50,7 @@ namespace AuthorizationSample.Claims {
             if (impersonateClaim != null) {
                 identity.RemoveClaim(impersonateClaim);
             }
-            identity.AddClaim(new Claim("impersonate", user));
+            identity.AddClaim(new Claim(ImpersonateCheck.ImpersonateClaimType, user));
             currentUser = new ClaimsPrincipal(identity);
             return Task.FromResult(new AuthenticationState(CurrentUser));
         }
@@ -67,7 +67,7 @@ namespace AuthorizationSample.Claims {
             if (identity == null) {
                 return Task.FromResult(new AuthenticationState(CurrentUser));
             }
-            var impersonateClaim = identity.FindFirst(c => c.Type == "impersonate");
+            var impersonateClaim = identity.FindFirst(c => c.Type == ImpersonateCheck.ImpersonateClaimType);
             if (impersonateClaim != null) {
                 identity.RemoveClaim(impersonateClaim);
             }
