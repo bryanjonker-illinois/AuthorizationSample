@@ -1,11 +1,18 @@
 ﻿@page "/fetchdata"
 @attribute [Authorize(Roles = "Admin")]
+@using AuthorizationSample.Claims;
 @using AuthorizationSample.Data
 @inject WeatherForecastService ForecastService
 
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <span>Hello, @ImpersonateCheck.ImpersonateId(context.User.Claims)!</span>
+    </Authorized>
+</AuthorizeView>
 
 <p>This component demonstrates fetching data from a service.</p>
 

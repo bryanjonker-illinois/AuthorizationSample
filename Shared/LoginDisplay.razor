@@ -1,6 +1,7 @@
-﻿<AuthorizeView>
+﻿@using AuthorizationSample.Claims;
+<AuthorizeView>
     <Authorized>
-        <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
+        <span>Hello, @ImpersonateCheck.ImpersonateId(context.User.Claims)!</span>
         <form method="post" action="Identity/Account/Logout">
             <button type="submit" class="nav-link btn btn-link">Log out</button>
         </form>
