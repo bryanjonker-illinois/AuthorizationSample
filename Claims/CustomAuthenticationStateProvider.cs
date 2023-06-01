@@ -28,12 +28,15 @@ namespace AuthorizationSample.Claims {
             }
             // normally, this would be pulling from a database based on user information.
             if (!identity.Claims.Any(c => c.Type == ClaimTypes.Role)) {
-                if (authState.User.Identity?.Name == "jonker" || authState.User.Identity?.Name == "bryanjonker@gmail.com") {
-                    identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
-                    identity.AddClaim(new Claim("coteid", "5"));
-                } else {
-                    identity.AddClaim(new Claim(ClaimTypes.Role, "Student"));
-                    identity.AddClaim(new Claim("coteid", "15"));
+                var userFromDatabase = MockDatabase.Get(authState.User.Identity?.Name ?? "");
+                if (userFromDatabase != null) {
+                    if (userFromDatabase.IsAdmin) {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
+                    } else {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "Student"));
+                        identity.AddClaim(new Claim(ClaimConstants.IeinClaimType, userFromDatabase.IEIN));
+                        identity.AddClaim(new Claim(ClaimConstants.EdwClaimType, userFromDatabase.EDWID));
+                    }
                 }
             }
             var user = new ClaimsPrincipal(identity);
@@ -46,20 +49,21 @@ namespace AuthorizationSample.Claims {
             if (identity == null) {
                 return Task.FromResult(new AuthenticationState(CurrentUser));
             }
-            var impersonateClaim = identity.FindFirst(c => c.Type == ImpersonateCheck.ImpersonateClaimType);
-            if (impersonateClaim != null) {
-                identity.RemoveClaim(impersonateClaim);
+            _ = RemoveImpersonation();
+            identity.AddClaim(new Claim(ClaimConstants.ImpersonateClaimType, user));
+            var userFromDatabase = MockDatabase.Get(user);
+            if (userFromDatabase != null) {
+                identity.AddClaim(new Claim(ClaimConstants.IeinClaimType, userFromDatabase.IEIN));
+                identity.AddClaim(new Claim(ClaimConstants.EdwClaimType, userFromDatabase.EDWID));
             }
-            identity.AddClaim(new Claim(ImpersonateCheck.ImpersonateClaimType, user));
             currentUser = new ClaimsPrincipal(identity);
             return Task.FromResult(new AuthenticationState(CurrentUser));
         }
 
         public IdentityUser PullManually(string guid) {
             // normally, this would be pulling from a database based on a GUID.
-            return guid == "student" ?
-                new IdentityUser("studentinfo") { Email = "student@gmail.com" } :
-                new IdentityUser("jonker") { Email = "bryanjonker@gmail.com" };
+            var userFromDatabase = MockDatabase.GetFromOldSystem(guid);
+            return userFromDatabase == null ? new IdentityUser() : new IdentityUser(userFromDatabase.Username) { Email = userFromDatabase.Email };
         }
 
         public Task<AuthenticationState> RemoveImpersonation() {
@@ -67,9 +71,17 @@ namespace AuthorizationSample.Claims {
             if (identity == null) {
                 return Task.FromResult(new AuthenticationState(CurrentUser));
             }
-            var impersonateClaim = identity.FindFirst(c => c.Type == ImpersonateCheck.ImpersonateClaimType);
+            var impersonateClaim = identity.FindFirst(c => c.Type == ClaimConstants.ImpersonateClaimType);
             if (impersonateClaim != null) {
                 identity.RemoveClaim(impersonateClaim);
+                var ieinClaim = identity.FindFirst(c => c.Type == ClaimConstants.IeinClaimType);
+                if (ieinClaim != null) {
+                    identity.RemoveClaim(ieinClaim);
+                }
+                var edwidClaim = identity.FindFirst(c => c.Type == ClaimConstants.EdwClaimType);
+                if (edwidClaim != null) {
+                    identity.RemoveClaim(edwidClaim);
+                }
             }
             currentUser = new ClaimsPrincipal(identity);
             return Task.FromResult(new AuthenticationState(CurrentUser));

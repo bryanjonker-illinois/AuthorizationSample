@@ -3,7 +3,6 @@
 namespace AuthorizationSample.Claims {
 
     public static class ImpersonateCheck {
-        public static string ImpersonateClaimType => "impersonate";
 
         public static string ImpersonateId(IEnumerable<Claim> claims) {
             var impersonateString = GetImpersonateString(claims);
@@ -15,6 +14,6 @@ namespace AuthorizationSample.Claims {
             return string.IsNullOrWhiteSpace(impersonateString) ? "no impersonation" : "impersonating " + impersonateString;
         }
 
-        private static string? GetImpersonateString(IEnumerable<Claim> claims) => claims.SingleOrDefault(c => c.Type == ImpersonateClaimType)?.Value;
+        private static string? GetImpersonateString(IEnumerable<Claim> claims) => claims.SingleOrDefault(c => c.Type == ClaimConstants.ImpersonateClaimType)?.Value;
     }
 }

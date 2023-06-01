@@ -9,7 +9,9 @@
 
         <p>@ImpersonateCheck.ImpersonateMessage(context.User.Claims)</p>
 
-        <p><button class="btn btn-primary" @onclick="Change">Change Impersonation</button></p>
+        <p><button class="btn btn-primary" @onclick="Change1">Change Impersonation to Student 1</button></p>
+
+        <p><button class="btn btn-primary" @onclick="Change2">Change Impersonation to Student 2</button></p>
 
         <p><button class="btn btn-primary" @onclick="Remove">Remove Impersonation</button></p>
 
@@ -17,9 +19,15 @@
 </AuthorizeView>
 
 @code {
-    private void Change()
+    private void Change1()
     {
-        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).Impersonate("sample");
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).Impersonate("student1");
+        StateHasChanged();
+    }
+
+    private void Change2()
+    {
+        ((CustomAuthenticationStateProvider)AuthenticationStateProvider).Impersonate("student2");
         StateHasChanged();
     }
 
